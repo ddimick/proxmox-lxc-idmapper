@@ -37,8 +37,8 @@ lxc.idmap: u 0 100000 1000
 lxc.idmap: g 0 100000 1000
 lxc.idmap: u 1000 1000 1
 lxc.idmap: g 1000 1000 1
-lxc.idmap: u 1001 101001 1000
-lxc.idmap: g 1001 101001 1000
+lxc.idmap: u 1001 101001 999
+lxc.idmap: g 1001 101001 999
 lxc.idmap: u 2000 2000 1
 lxc.idmap: g 2000 2000 1
 lxc.idmap: u 2001 102001 63535
