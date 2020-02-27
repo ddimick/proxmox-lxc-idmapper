@@ -2,33 +2,63 @@
 
 import argparse
 
-def range_type(value, min = 1, max = 65535):
-  if not value.isdigit():
-    raise argparse.ArgumentTypeError('"%s" is not a number' % value)
-  elif not min <= int(value) <= max:
-    raise argparse.ArgumentTypeError('"%s" is not in range %s-%s' % (value, min, max))
+# validates user input
+def parser_validate(value, min = 1, max = 65535):
+  (uid, gid) = value.split(':') if ':' in value else (value, value)
+
+  if not uid.isdigit():
+    raise argparse.ArgumentTypeError('UID "%s" is not a number' % uid)
+  elif not gid.isdigit():
+    raise argparse.ArgumentTypeError('GID "%s" is not a number' % gid)
+  elif not min <= int(uid) <= max:
+    raise argparse.ArgumentTypeError('UID "%s" is not in range %s-%s' % (uid, min, max))
+  elif not min <= int(gid) <= max:
+    raise argparse.ArgumentTypeError('GID "%s" is not in range %s-%s' % (gid, min, max))
   else:
-    return int(value)
+    return(int(uid), int(gid))
 
-_parser = argparse.ArgumentParser(description='Proxmox unprivileged container/host uid/gid mapping syntax tool.')
-_parser.add_argument('-u', '--uid', type = range_type, metavar = '[1-65535]', required = True, help = 'uid of user in container to map')
-_parser.add_argument('-g', '--gid', type = range_type, metavar = '[1-65535]', help = 'gid of group in container to map (optional; uid will be used for gid if ommitted)')
-_parser_args = _parser.parse_args()
+# creates lxc mapping strings
+def create_map(id_type, id_list):
+  ret = list()
 
-if not _parser_args.gid:
-  _parser_args.gid = _parser_args.uid
-  print('No gid provided, using uid\'s value (%s) for gid.' % _parser_args.uid)
+  for i, uid in enumerate(id_list):
+    if i is 0:
+      ret.append('lxc.idmap: %s 0 100000 %s' % (id_type, uid))
+    else:
+      range = (id_list[i-1] + 1, id_list[i-1] + 100001, (uid - 1) - id_list[i-1])
+      ret.append('lxc.idmap: %s %s %s %s' % (id_type, range[0], range[1], range[2]))
 
-print('\n# Add to /etc/pve/lxc/<container id>.conf:')
-print('lxc.idmap: u 0 100000 %s' % _parser_args.uid)
-print('lxc.idmap: g 0 100000 %s' % _parser_args.gid)
-print('lxc.idmap: u %s %s 1' % (_parser_args.uid, _parser_args.uid))
-print('lxc.idmap: g %s %s 1' % (_parser_args.gid, _parser_args.gid))
-print('lxc.idmap: u %s %s %s' % (_parser_args.uid + 1, _parser_args.uid + 100001, 65535 - _parser_args.uid))
-print('lxc.idmap: g %s %s %s' % (_parser_args.gid + 1, _parser_args.gid + 100001, 65535 - _parser_args.gid))
+    ret.append('lxc.idmap: %s %s %s 1' % (id_type, uid, uid))
+
+    if i is len(id_list) - 1:
+      range = (uid + 1, uid + 100001, 65535 - uid)
+      ret.append('lxc.idmap: %s %s %s %s' % (id_type, range[0], range[1], range[2]))
+
+  return(ret)
+
+# collect user input
+parser = argparse.ArgumentParser(description='Proxmox unprivileged container to host uid:gid mapping syntax tool.')
+parser.add_argument('id', nargs = '+', type = parser_validate, metavar='uid[:gid]', help = 'Container uid and optional gid to map to host. If a gid is not specified, the uid will be used for the gid value.')
+parser_args = parser.parse_args()
+
+# create sorted uid/gid lists
+uid_list = sorted([i[0] for i in parser_args.id])
+gid_list = sorted([i[1] for i in parser_args.id])
+
+# calls function that creates mapping strings
+uid_map = create_map('u', uid_list)
+gid_map = create_map('g', gid_list)
+
+# output mapping strings
+print('\n# Add to /etc/pve/lxc/<container_id>.conf:')
+for i in enumerate(uid_map):
+  print(uid_map[i[0]])
+  print(gid_map[i[0]])
 
 print('\n# Add to /etc/subuid:')
-print('root:%s:1' % _parser_args.uid)
+for uid in uid_list:
+  print('root:%s:1' % uid)
 
 print('\n# Add to /etc/subgid:')
-print('root:%s:1' % _parser_args.gid)
+for gid in gid_list:
+  print('root:%s:1' %gid)
