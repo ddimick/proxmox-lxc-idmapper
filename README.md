@@ -1,7 +1,7 @@
 # Proxmox unprivileged container/host uid/gid mapping syntax tool
 
-I've edited @ddimick's script to handle "custom" host ids. Please be advised that i haven't gotten around to extensively test my addition. See [my notes](https://gist.github.com/chhaugen/3d04bddd64126b15511c63494d11c4d0) on trying to understand the mapping schema.
-Please correct me if I've misunderstood the schema, or tell me I did good if i figured it out.
+I've edited @ddimick's script to handle "custom" host ids. Please be advised that I haven't gotten around to extensively test my addition. See [my notes](https://gist.github.com/chhaugen/3d04bddd64126b15511c63494d11c4d0) on trying to understand the mapping schema.
+Please correct me if I've misunderstood the schema, or tell me I did good if I figured it out.
 
 ## What
 
