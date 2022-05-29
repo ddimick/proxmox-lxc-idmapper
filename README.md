@@ -15,40 +15,42 @@ Python 2.7+ / 3.7+
 ### Usage
 
 ```bash
-usage: run.py [-h] uid[:gid] [uid[:gid] ...]
+usage: run.py [-h]
+              containeruid[:containergid][=hostuid[:hostgid]] [containeruid[:containergid][=hostuid[:hostgid]] ...]
 
 Proxmox unprivileged container to host uid:gid mapping syntax tool.
 
 positional arguments:
-  uid[:gid]   Container uid and optional gid to map to host. If a gid is not
-              specified, the uid will be used for the gid value.
+  containeruid[:containergid][=hostuid[:hostgid]]
+                        Container uid and optional gid to map to host. If a gid is not specified, the uid will be used
+                        for the gid value.
 
 optional arguments:
-  -h, --help  show this help message and exit
+  -h, --help            show this help message and exit
 ```
 
 ### Example
 
 ```bash
-$ ./run.py 1000 2000
+$ ./run.py 1000=1005 1005=1001
 
 # Add to /etc/pve/lxc/<container_id>.conf:
 lxc.idmap: u 0 100000 1000
 lxc.idmap: g 0 100000 1000
-lxc.idmap: u 1000 1000 1
-lxc.idmap: g 1000 1000 1
-lxc.idmap: u 1001 101001 999
-lxc.idmap: g 1001 101001 999
-lxc.idmap: u 2000 2000 1
-lxc.idmap: g 2000 2000 1
-lxc.idmap: u 2001 102001 63535
-lxc.idmap: g 2001 102001 63535
+lxc.idmap: u 1000 1005 1
+lxc.idmap: g 1000 1005 1
+lxc.idmap: u 1001 101001 4
+lxc.idmap: g 1001 101001 4
+lxc.idmap: u 1005 1001 1
+lxc.idmap: g 1005 1001 1
+lxc.idmap: u 1006 101006 64530
+lxc.idmap: g 1006 101006 64530
 
 # Add to /etc/subuid:
-root:1000:1
-root:2000:1
+root:1005:1
+root:1001:1
 
 # Add to /etc/subgid:
-root:1000:1
-root:2000:1
+root:1005:1
+root:1001:1
 ```
