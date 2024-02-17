@@ -10,32 +10,36 @@ def parser_validate(value, min = 1, max = 65535):
 
   if containeruid == "":
     containeruid = None
+  if containergid == "":
+    containergid = None
   if hostuid == "":
     hostuid = None
+  if hostgid == "":
+    hostgid = None
 
   if containeruid is not None and not containeruid.isdigit():
     raise argparse.ArgumentTypeError('Container UID "%s" is not a number' % containeruid)
-  elif not containergid.isdigit():
+  elif containergid is not None and not containergid.isdigit():
     raise argparse.ArgumentTypeError('Container GID "%s" is not a number' % containergid)
   elif containeruid is not None and not min <= int(containeruid) <= max:
     raise argparse.ArgumentTypeError('Container UID "%s" is not in range %s-%s' % (containeruid, min, max))
-  elif not min <= int(containergid) <= max:
+  elif containergid is not None and not min <= int(containergid) <= max:
     raise argparse.ArgumentTypeError('Container GID "%s" is not in range %s-%s' % (containergid, min, max))
   
   if hostuid is not None and not hostuid.isdigit():
     raise argparse.ArgumentTypeError('Host UID "%s" is not a number' % hostuid)
-  elif not hostgid.isdigit():
+  elif hostgid is not None and not hostgid.isdigit():
     raise argparse.ArgumentTypeError('Host GID "%s" is not a number' % hostgid)
   elif hostuid is not None and not min <= int(hostuid) <= max:
     raise argparse.ArgumentTypeError('Host UID "%s" is not in range %s-%s' % (hostuid, min, max))
-  elif not min <= int(hostgid) <= max:
+  elif hostgid is not None and not min <= int(hostgid) <= max:
     raise argparse.ArgumentTypeError('Host GID "%s" is not in range %s-%s' % (hostgid, min, max))
   else:
     return (
       int(containeruid) if containeruid is not None else None, 
-      int(containergid), 
+      int(containergid) if containergid is not None else None, 
       int(hostuid) if hostuid is not None else None, 
-      int(hostgid)
+      int(hostgid) if hostgid is not None else None
     )
 
 # creates lxc mapping strings
