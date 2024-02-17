@@ -44,16 +44,16 @@ def create_map(id_type, id_list):
   
   for i, (containerid, hostid) in enumerate(id_list):
     if i == 0:
-      ret.append('lxc.idmap: %s 0 100000 %s' % (id_type, containerid))
-    else:
+      ret.append('lxc.idmap: %s 0 100000 %s start' % (id_type, containerid))
+    elif id_list[i][0] != id_list[i-1][0] + 1:
       range = (id_list[i-1][0] + 1, id_list[i-1][0] + 100001, (containerid - 1) - id_list[i-1][0])
-      ret.append('lxc.idmap: %s %s %s %s' % (id_type, range[0], range[1], range[2]))
+      ret.append('lxc.idmap: %s %s %s %s else' % (id_type, range[0], range[1], range[2]))
 
-    ret.append('lxc.idmap: %s %s %s 1' % (id_type, containerid, hostid))
+    ret.append('lxc.idmap: %s %s %s 1 other' % (id_type, containerid, hostid))
 
     if i is len(id_list) - 1:
       range = (containerid + 1, containerid + 100001, 65535 - containerid)
-      ret.append('lxc.idmap: %s %s %s %s' % (id_type, range[0], range[1], range[2]))
+      ret.append('lxc.idmap: %s %s %s %s something' % (id_type, range[0], range[1], range[2]))
 
   return(ret)
 
