@@ -45,6 +45,11 @@ def parser_validate(value, min = 1, max = 65535):
 # creates lxc mapping strings
 def create_map(id_type, id_list):
   ret = list()
+
+  # Case where no uid/gid is specified
+  if not id_list:
+    ret.append('lxc.idmap: %s 0 100000 65536' % (id_type))
+    return(ret)
   
   for i, (containerid, hostid) in enumerate(id_list):
     if i == 0:
@@ -81,11 +86,12 @@ for i in enumerate(uid_map):
 for i in enumerate(gid_map):
   print(gid_map[i[0]])
 
+if uid_list:
+  print('\n# Add to /etc/subuid:')
+  for uid in uid_list:
+    print('root:%s:1' % uid[1])
 
-print('\n# Add to /etc/subuid:')
-for uid in uid_list:
-  print('root:%s:1' % uid[1])
-
-print('\n# Add to /etc/subgid:')
-for gid in gid_list:
-  print('root:%s:1' %gid[1])
+if gid_list:
+  print('\n# Add to /etc/subgid:')
+  for gid in gid_list:
+    print('root:%s:1' %gid[1])
